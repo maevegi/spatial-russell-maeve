@@ -37,12 +37,29 @@ We are going to explore one metric for how structural racism and classism underp
 
 We are going to recreate these city maps, and plot the distributions and mean vegetation patterns across cities to explore the structural inequality and racism that Schell et al highlight in their paper.
 
-
 To do this we are going to use the following spatial data:  
 
 **1.Mapping Inequality:** (vector data)  
 Please take the time to read the introduction to this dataset [here](https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro)
 
+```{r}
+oakland_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
+
+oakland_url <- paste0("/vsizip/vsicurl/", oakland_zip)
+
+oak <- read_sf(oakland_url)
+oak
+```
+
+
+```{r}
+tmap_mode("view") #hashtag when knitting
+```
+
+
+```{r}
+tm_shape(oak) + tm_polygons("holc_grade", alpha = 0.5)
+=======
 
 ```{r}
 oaklandzip<-"https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
@@ -66,6 +83,7 @@ tmap_mode("view") #hashtag this later when knitting
 tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 tm_shape(sf2) + tm_polygons("holc_grade", alpha=0.5)
 tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
+>>>>>>> 5e0411023df08cd8fe3f2ae3b2db85a920841f03
 ```
 ```{r}
 #install.packages(c("gdalcubes", "rstac"))
