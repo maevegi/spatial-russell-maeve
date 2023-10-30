@@ -59,8 +59,10 @@ tmap_mode("view") #hashtag when knitting
 
 ```{r}
 tm_shape(oak) + tm_polygons("holc_grade", alpha = 0.5)
-```
+
+
 ```{r}
+
 oaklandzip<-"https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
 
 san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
@@ -97,13 +99,14 @@ gdalcubes::gdalcubes_options(parallel = TRUE)
 ```{r}
 ## STAC Search over 400 million assets.
 #use stt_bbox to find coordinates for city 
-box <- c(xmin=-122.51006, ymin=37.70801, xmax=-122.36268, ymax=37.80668) 
+box<- st_bbox(sf)
+#box <- c(xmin=-122.51006, ymin=37.70801, xmax=-122.36268, ymax=37.80668) 
 start_date <- "2022-06-01"
-end_date <- "2022-08-01"
+end_date <- "2022-08-31"
 items <- 
   stac("https://earth-search.aws.element84.com/v0/") |>
   stac_search(collections = "sentinel-s2-l2a-cogs",
-              bbox = box,
+              bbox =c(box),
               datetime = paste(start_date, end_date, sep="/"),
               limit = 100) |>
   post_request() 
@@ -126,35 +129,15 @@ cube <- cube_view(srs = "EPSG:4326",
                                 top = box[4], bottom = box[2]),
                   nx = 1000, ny = 1000, dt = "P1M",
                   aggregation = "median", resampling = "average")
+
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 
 ndvi <- 
   raster_cube(col, cube, mask = S2.mask) |>
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
-  aggregate_time("P3M") 
-
-```
-
-
-
-```{r}
-avg_ndvi<- ndvi|>
-  extract_geom(sf, FUN=mean)
-avg_ndvi|> as_tibble()
-sf_new<- sf|> rowid_to_column("FID")
-ndvi_polygons<- left_join(sf_new, avg_ndvi)
-ndvi_polygons
-```
-```{r}
-plot(ndvi_polygons)
-ndvi_polygons|>as_tibble()|>
-group_by(holc_grade)|>
-summarise(mean_NDVI=mean(NDVI))
- 
- tm_basemap()+
- tm_shape(ndvi_polygons, palette="Green")+tm_polygons("NDVI")+
- tm_shape(ndvi_polygons) + tm_text("holc_grade")
+  aggregate_time("P3M") |>
+  st_as_stars()
 ```
 ```{r}
 raster_cube(col, cube, mask= S2.mask)|>
@@ -163,7 +146,10 @@ raster_cube(col, cube, mask= S2.mask)|>
 ```
 ```{r}
 ndvi2<- ndvi|> st_as_stars()
-tm_shape(ndvi2)+ tm_raster()
+
+tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
+plot(ndvi2)
+plot(ndvi)
 ```
 
 #Map redlining map with NDVI image
