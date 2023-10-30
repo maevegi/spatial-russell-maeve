@@ -59,8 +59,7 @@ tmap_mode("view") #hashtag when knitting
 
 ```{r}
 tm_shape(oak) + tm_polygons("holc_grade", alpha = 0.5)
-
-
+```
 ```{r}
 oaklandzip<-"https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
 
@@ -133,10 +132,30 @@ ndvi <-
   raster_cube(col, cube, mask = S2.mask) |>
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
-  aggregate_time("P3M") |>
-  st_as_stars()
+  aggregate_time("P3M") 
+
 ```
 
+
+
+```{r}
+avg_ndvi<- ndvi|>
+  extract_geom(sf, FUN=mean)
+avg_ndvi|> as_tibble()
+sf_new<- sf|> rowid_to_column("FID")
+ndvi_polygons<- left_join(sf_new, avg_ndvi)
+ndvi_polygons
+```
+```{r}
+plot(ndvi_polygons)
+ndvi_polygons|>as_tibble()|>
+group_by(holc_grade)|>
+summarise(mean_NDVI=mean(NDVI))
+ 
+ tm_basemap()+
+ tm_shape(ndvi_polygons, palette="Green")+tm_polygons("NDVI")+
+ tm_shape(ndvi_polygons) + tm_text("holc_grade")
+```
 ```{r}
 raster_cube(col, cube, mask= S2.mask)|>
   select_bands(c("B08", "B04"))|>
