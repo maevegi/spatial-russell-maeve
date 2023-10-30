@@ -56,10 +56,9 @@ oak
 tmap_mode("view") #hashtag when knitting
 ```
 
-
 ```{r}
 tm_shape(oak) + tm_polygons("holc_grade", alpha = 0.5)
-
+```
 
 ```{r}
 
@@ -131,6 +130,7 @@ cube <- cube_view(srs = "EPSG:4326",
                   aggregation = "median", resampling = "average")
 
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
+```
 
 ```{r}
 ndvi <- 
