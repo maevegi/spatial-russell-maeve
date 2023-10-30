@@ -1,10 +1,10 @@
+[![Reproducibility](https://github.com/espm-157/spatial-russell-maeve/actions/workflows/main.yml/badge.svg)](https://github.com/espm-157/spatial-russell-maeve/actions/workflows/main.yml)
 
-*add github actions badge here*
 
 ## Team Members:
 
-- full name, github handle
-- full name, github handle
+- Maeve Gilbert, maevegi
+- Russell Huang, Huangary1126
 
 This repository is a template for your team's repository.
 
