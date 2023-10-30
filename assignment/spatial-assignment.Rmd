@@ -132,13 +132,38 @@ cube <- cube_view(srs = "EPSG:4326",
 
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 
+```{r}
 ndvi <- 
   raster_cube(col, cube, mask = S2.mask) |>
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
-  aggregate_time("P3M") |>
-  st_as_stars()
+  aggregate_time("P3M") 
+
 ```
+
+```{r}
+avg_ndvi<-ndvi|>
+extract_geom(sf, FUN=mean)
+avg_ndvi|>as_tibble()
+sf_new<- sf|> rowid_to_column("FID")
+ndvi_polygons<- left_join(sf_new, avg_ndvi)
+ndvi_polygons
+```
+
+```{r}
+tmap_mode("plot")
+tm_basemap()+
+tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile")+
+  tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
+```
+
+```{r}
+ndvi_polygons|>as_tibble()|>
+ group_by(holc_grade)|>
+ summarise(mean_NDVI=mean(NDVI))
+
+```
+
 ```{r}
 raster_cube(col, cube, mask= S2.mask)|>
   select_bands(c("B08", "B04"))|>
