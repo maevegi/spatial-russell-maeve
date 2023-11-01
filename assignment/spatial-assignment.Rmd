@@ -1,9 +1,9 @@
 ---
 title: "The ecological and evolutionary consequences of systemic racism"
-author: "Millie Chapman (GSI)"
+author: "Maeve Gilbert and Russell Huang"
 output: 
-  github_document:
-    df_print: tibble
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -86,7 +86,7 @@ tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
 
 ```{r}
-#install.packages(c("gdalcubes", "rstac"))
+install.packages(c("gdalcubes", "rstac"))
 library(tidyverse)
 library(rstac)
 library(gdalcubes)
@@ -153,7 +153,7 @@ ndvi_polygons
 ```{r}
 tmap_mode("plot")
 tm_basemap()+
-tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile")+
+tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
   tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
 ```
 
@@ -174,7 +174,7 @@ ndvi2<- ndvi|> st_as_stars()
 
 tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 plot(ndvi2)
-plot(ndvi)
+
 ```
 
 #Map redlining map with NDVI image
