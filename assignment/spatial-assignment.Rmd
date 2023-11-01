@@ -190,11 +190,66 @@ NDVI is used as proxy measure of vegetation health, cover and phenology (life cy
 **Create a map which shows current (2019) mean NDVI across city redlining from the 1950s.**
 
 ```{r}
+box2<- st_bbox(oak)
+#box <- c(xmin=-122.51006, ymin=37.70801, xmax=-122.36268, ymax=37.80668) 
+start_date <- "2022-06-01"
+end_date <- "2022-08-31"
+items <- 
+  stac("https://earth-search.aws.element84.com/v0/") |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox =c(box2),
+              datetime = paste(start_date, end_date, sep="/"),
+              limit = 100) |>
+  post_request() 
+```
+
+```{r}
+cube2 <- cube_view(srs = "EPSG:4326",  
+                  extent = list(t0 = start_date, t1 = "2022-08-31",
+                                left = box2[1], right = box2[3],
+                                top = box2[4], bottom = box2[2]),
+                  nx = 1000, ny = 1000, dt = "P1M",
+                  aggregation = "median", resampling = "average")
+
+S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
+```
+
+```{r}
+oak_ndvi <- 
+  raster_cube(col, cube2, mask = S2.mask) |>
+  select_bands(c("B08", "B04")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+  aggregate_time("P3M") 
+```
+
+```{r}
+oak_avg_ndvi<-oak_ndvi|>
+extract_geom(oak, FUN=mean)
+avg_ndvi|>as_tibble()
+oak_new<- oak|> rowid_to_column("FID")
+oak_polygons<- left_join(oak_new, avg_ndvi)
+ndvi_polygons
+```
+
+```{r}
+tmap_mode("plot")
+tm_basemap()+
+tm_shape(oak_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+  tm_shape(oak_polygons)+ tm_text("holc_grade", size=0.5)
+```
+
+```{r}
+oak_polygons|>as_tibble()|>
+ group_by(holc_grade)|>
+ summarise(mean_NDVI=mean(NDVI))
 ```
 
 # Exercise 2
 **Plot the average NDVI values in different neighborhoods as well as the distribution of pixel values across cities and neighborhoods. Show how the trends differ between cities.**
 
+```{r}
+
+```
 
 
 # Exercise 3: 
