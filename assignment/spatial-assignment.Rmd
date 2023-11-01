@@ -172,8 +172,9 @@ raster_cube(col, cube, mask= S2.mask)|>
 ```{r}
 ndvi2<- ndvi|> st_as_stars()
 
-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
-plot(ndvi2)
+sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
+sf_ndvi
+plot(sf_ndvi)
 
 ```
 
