@@ -86,7 +86,7 @@ tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
 
 ```{r}
-install.packages(c("gdalcubes", "rstac"))
+#install.packages(c("gdalcubes", "rstac"))
 library(tidyverse)
 library(rstac)
 library(gdalcubes)
@@ -201,6 +201,7 @@ items <-
               datetime = paste(start_date, end_date, sep="/"),
               limit = 100) |>
   post_request() 
+
 ```
 
 ```{r}
@@ -212,6 +213,7 @@ cube2 <- cube_view(srs = "EPSG:4326",
                   aggregation = "median", resampling = "average")
 
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
+cube2
 ```
 
 ```{r}
@@ -220,22 +222,28 @@ oak_ndvi <-
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   aggregate_time("P3M") 
+oak_ndvi
 ```
 
 ```{r}
 oak_avg_ndvi<-oak_ndvi|>
-extract_geom(oak, FUN=mean)
-avg_ndvi|>as_tibble()
+  extract_geom(oak, FUN=mean)
+oak_avg_ndvi|>as_tibble()
 oak_new<- oak|> rowid_to_column("FID")
-oak_polygons<- left_join(oak_new, avg_ndvi)
-ndvi_polygons
+oak_polygons<- left_join(oak_new, oak_avg_ndvi)
+oak_polygons
+
+
 ```
 
 ```{r}
 tmap_mode("plot")
-tm_basemap()+
+oakland_NDVI<-tm_basemap()+
 tm_shape(oak_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
-  tm_shape(oak_polygons)+ tm_text("holc_grade", size=0.5)
+  tm_shape(oak_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
+
+oakland_NDVI[holc_id=NA]<-NA
+oakland_NDVI
 ```
 
 ```{r}
