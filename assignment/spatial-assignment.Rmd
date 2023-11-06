@@ -24,7 +24,7 @@ In order to examine the continuing effects of redlining, we are examining the no
 **Figure 2** Professor Schell's paper shows how NDVI (Normalized Difference Vegetation Index) tracks historical redlining.
 ![Fig. 1.](figures/fig2.png)
 
-We are utilizing the following spatial data:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
+We are utilizing spatial data from the following source:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
 
 **1.Mapping Inequality:** 
 
@@ -173,9 +173,9 @@ NDVI is used as proxy measure of vegetation health, cover and phenology (life cy
 **Create a map which shows current (2019) mean NDVI across city redlining from the 1950s.**
 
 ```{r}
-box2<- st_bbox(oak)
-start_date <- "2021-11-01"
-end_date <- "2022-03-31"
+box2<- st_bbox(sf3)
+start_date <- "2022-06-01"
+end_date <- "2022-08-31"
 items <- 
   stac("https://earth-search.aws.element84.com/v0/") |>
   stac_search(collections = "sentinel-s2-l2a-cogs",
@@ -199,21 +199,21 @@ cube2
 ```
 
 ```{r}
-oak_ndvi <- 
+sf3_ndvi <- 
   raster_cube(col, cube2, mask = S2.mask) |>
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   aggregate_time("P3M") 
-oak_ndvi
+sf3_ndvi
 ```
 
 ```{r}
-oak_avg_ndvi<-oak_ndvi|>
-  extract_geom(oak, FUN=mean)
-oak_avg_ndvi|>as_tibble()
-oak_new<- oak|> rowid_to_column("FID")
-oak_polygons<- left_join(oak_new, oak_avg_ndvi)
-oak_polygons
+sf3_avg_ndvi<-sf3_ndvi|>
+  extract_geom(sf3, FUN=mean)
+sf3_avg_ndvi|>as_tibble()
+sf3_new<- sf3|> rowid_to_column("FID")
+sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
+sf3_polygons
 
 #why are NDVI values so small? 
 #fix reproducibility issues 
@@ -221,16 +221,16 @@ oak_polygons
 
 ```{r}
 tmap_mode("plot")
-oakland_NDVI<-tm_basemap()+
-tm_shape(oak_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
-  tm_shape(oak_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
+sanjose_NDVI<-tm_basemap()+
+tm_shape(sf3_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+  tm_shape(sf3_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
 
-oakland_NDVI[holc_id=NA]<-NA
-oakland_NDVI
+sanjose_NDVI[holc_id=NA]<-NA
+sanjose_NDVI
 ```
 
 ```{r}
-oak_polygons|>as_tibble()|>
+sf3_polygons|>as_tibble()|>
  group_by(holc_grade)|>
  summarise(mean_NDVI=mean(NDVI))
 ```
