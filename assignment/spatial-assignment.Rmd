@@ -86,7 +86,7 @@ tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
 
 ```{r}
-#install.packages(c("gdalcubes", "rstac"))
+install.packages(c("gdalcubes", "rstac"))
 library(tidyverse)
 library(rstac)
 library(gdalcubes)
@@ -171,7 +171,7 @@ raster_cube(col, cube, mask= S2.mask)|>
 ```
 ```{r}
 ndvi2<- ndvi|> st_as_stars()
-
+library(tmap)
 sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
 sf_ndvi
 plot(sf_ndvi)
@@ -191,7 +191,6 @@ NDVI is used as proxy measure of vegetation health, cover and phenology (life cy
 
 ```{r}
 box2<- st_bbox(oak)
-#box <- c(xmin=-122.51006, ymin=37.70801, xmax=-122.36268, ymax=37.80668) 
 start_date <- "2022-06-01"
 end_date <- "2022-08-31"
 items <- 
@@ -233,7 +232,8 @@ oak_new<- oak|> rowid_to_column("FID")
 oak_polygons<- left_join(oak_new, oak_avg_ndvi)
 oak_polygons
 
-
+#why are NDVI values so small? 
+#fix reproducibility issues 
 ```
 
 ```{r}
