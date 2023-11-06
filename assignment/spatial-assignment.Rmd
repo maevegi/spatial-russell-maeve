@@ -14,57 +14,8 @@ library(tmap)      #interactive maps, raster + vector layers
 library(terra)       # Successor to the raster library
 library(tidyverse)   # our old friend
 library(sf)          # to work with simple features (vector) data
-```
-
-# Introduction to the Data Set
-In August 2020, [Christopher Schell](http://directory.tacoma.uw.edu/employee/cjschell) and collegues published a review in *Science* on ['The ecological and evolutionary consequences of systemic racism in urban environments'](https://science.sciencemag.org/content/early/2020/08/12/science.aay4497) (DOI: 10.1126/science.aay4497), showing how systematic racism and classism  has significant impacts on ecological and evolutionary processes within urban environments. Here we explore a subset of the data used to support these findings in this review and the broader literature.
-
-In order to examine the continuing effects of redlining, we are examining the normalized difference vegetation index (NDVI) for San Francisco and compare it to the map of different lone grade district. These are areas assigned on a scale from A to D based on "mortgage security"by the Home Owners' Loan Corporation (HOLC). Zones with a grade of A were considered the least risky, while D was considered the lowest grade for high risk neighborhoods. In these low-grade districts it was much harder to get loans to purchase houses. These grades were usually assigned not on an economical standard, but on a racially motivated basis. 
-
-**Figure 2** Professor Schell's paper shows how NDVI (Normalized Difference Vegetation Index) tracks historical redlining.
-![Fig. 1.](figures/fig2.png)
-
-We are utilizing spatial data from the following source:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
-
-**1.Mapping Inequality:** 
-
-We are using the function "tmap_mode" to generate interactive maps of the data
-```{r}
-#tmap_mode("view") #hashtag when knitting
-```
-
-```{r}
-tm_shape(oak) + tm_polygons("holc_grade", alpha = 0.5)
-```
-
-```{r}
-
-oaklandzip<-"https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
-
-san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
-san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
-
-oaklandurl<-paste0("/vsizip/vsicurl/", oaklandzip)
-san_franurl <- paste0("/vsizip/vsicurl/", san_fran_zip)
-san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
-sf <- read_sf(san_franurl)
-sf2<-read_sf(oaklandurl)
-sf3<- read_sf(san_joseurl)
-
-sf
-sf2
-sf3
-```
-```{r}
-tmap_mode("view") #hashtag this later when knitting 
-tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
-tm_shape(sf2) + tm_polygons("holc_grade", alpha=0.5)
-tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
-```
-
-```{r}
 install.packages(c("gdalcubes", "rstac"))
-library(tidyverse)
+install.packages("tmap")
 library(rstac)
 library(gdalcubes)
 library(stars)
@@ -72,11 +23,41 @@ library(tmap)
 gdalcubes::gdalcubes_options(parallel = TRUE)
 ```
 
+# Introduction to the Data Set
+In August 2020, [Christopher Schell](http://directory.tacoma.uw.edu/employee/cjschell) and collegues published a review in *Science* on ['The ecological and evolutionary consequences of systemic racism in urban environments'](https://science.sciencemag.org/content/early/2020/08/12/science.aay4497) (DOI: 10.1126/science.aay4497), showing how systematic racism and classism  has significant impacts on ecological and evolutionary processes within urban environments. Here we explore a subset of the data used to support these findings in this review and the broader literature.
+
+In order to examine the continuing effects of redlining, we are examining the normalized difference vegetation index (NDVI) for San Francisco and compare it to the map of different loan grade district. We are also going to compare the redlining and NDVI maps of San Francisco and San Jose. These are areas assigned on a scale from A to D based on "mortgage security"by the Home Owners' Loan Corporation (HOLC). Zones with a grade of A were considered the least risky, while D was considered the lowest grade for high risk neighborhoods. In these low-grade districts it was much harder to get loans to purchase houses. These grades were usually assigned not on an economical standard, but on a racially motivated basis. 
+
+**Figure 2** Professor Schell's paper shows how NDVI (Normalized Difference Vegetation Index) tracks historical redlining.
+![Fig. 1.](figures/fig2.png)
+
+We are utilizing spatial data from the following source:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
+
+**1.Mapping Inequality:** 
+We first need to read in the shape files for the cities we are going to examine. 
 ```{r}
-## STAC Search over 400 million assets.
-#use stt_bbox to find coordinates for city 
+
+san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
+san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
+
+san_franurl <- paste0("/vsizip/vsicurl/", san_fran_zip)
+san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
+sf <- read_sf(san_franurl)
+sf3<- read_sf(san_joseurl)
+
+sf
+sf3
+```
+Here we want to view the shapefiles for the two cities we are examining, San Francisco (sf) and San Jose (sf3). 
+```{r}
+tmap_mode("view") #hashtag this later when knitting 
+tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
+tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
+```
+
+Next, we needed to specify the coordinates for the perimeter of the city, beginning with San Francisco. Once we have this shape defined, we can extract the necessary NDVI data collected from the Sentinel 2 satellite. 
+```{r}
 box<- st_bbox(sf)
-#box <- c(xmin=-122.51006, ymin=37.70801, xmax=-122.36268, ymax=37.80668) 
 start_date <- "2022-06-01"
 end_date <- "2022-08-31"
 items <- 
@@ -87,17 +68,14 @@ items <-
               limit = 100) |>
   post_request() 
 ```
-
-```{r}
-names(items$features[[1]])
-```
+Because NDVI is collected from satellite data, we specify which bands of light we are going to examine, in this case green, and exclude any values with more than 20% cloud cover. 
 ```{r}
 col <-
   stac_image_collection(items$features,
                         asset_names = c("B02", "B03", "B04","B08", "SCL"),
-                        property_filter = \(x) {x[["eo:cloud_cover"]] < 20})#filter out images with more than 20 percent cloud cover
+                        property_filter = \(x) {x[["eo:cloud_cover"]] < 20})
 ```
-
+Using the data we extracted and the time span and dimensions of our area of study, we can create a spatiotemporal data cube with all of this information. 
 ```{r}
 cube <- cube_view(srs = "EPSG:4326",  
                   extent = list(t0 = start_date, t1 = "2022-08-31",
@@ -108,7 +86,7 @@ cube <- cube_view(srs = "EPSG:4326",
 
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 ```
-
+Once we have defined the data cube, we need to apply the calculation for NDVI using the specified data bands for infrared and near-infrared light. 
 ```{r}
 ndvi <- 
   raster_cube(col, cube, mask = S2.mask) |>
@@ -117,7 +95,7 @@ ndvi <-
   aggregate_time("P3M") 
 
 ```
-
+To map the data, we want to examine the average of all of the pixels within each HOLC grade district. 
 ```{r}
 avg_ndvi<-ndvi|>
 extract_geom(sf, FUN=mean)
@@ -126,14 +104,14 @@ sf_new<- sf|> rowid_to_column("FID")
 ndvi_polygons<- left_join(sf_new, avg_ndvi)
 ndvi_polygons
 ```
-
+Once we have the average values by each district, we want to plot these NDVI values onto the polygons of the HOLC districts. The darker green polygons have higher NDVI values, while the lighter green indicates lower NDVI values.
 ```{r}
 tmap_mode("plot")
 tm_basemap()+
 tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
   tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
 ```
-
+While the map gives us a visual representation of the data, it is difficult to determine with certainty whether areas with higher grades of A or B have higher NDVI values. In order to determine whether there is a correlation between the two values, we need to look at the average NDVI values for each HOLC grade. 
 ```{r}
 ndvi_polygons|>as_tibble()|>
  group_by(holc_grade)|>
@@ -141,27 +119,13 @@ ndvi_polygons|>as_tibble()|>
 
 ```
 
-```{r}
-raster_cube(col, cube, mask= S2.mask)|>
-  select_bands(c("B08", "B04"))|>
-  apply_pixel("(B08-B04)/(B08+B04)", "NDVI")
-```
+Finally, we want to examine the HOLC grade polygon map directly on top of the NDVI values as another visual representation of the correlation between the two values. 
 ```{r}
 ndvi2<- ndvi|> st_as_stars()
-library(tmap)
 sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
+sf_ndvi
 ```
-
-#Map redlining map with NDVI image
-> "As you explore the materials Mapping Inequality, you will quickly encounter exactly that kind of language, descriptions of the "infiltration" of what were quite often described as "subversive," "undesirable," "inharmonious," or "lower grade" populations, for they are everywhere in the HOLC archive ....These grades were a tool for redlining: making it difficult or impossible for people in certain areas to access mortgage financing and thus become homeowners. Redlining directed both public and private capital to native-born white families and away from African American and immigrant families. As homeownership was arguably the most significant means of intergenerational wealth building in the United States in the twentieth century, these redlining practices from eight decades ago had long-term effects in creating wealth inequalities that we still see today. Mapping Inequality, we hope, will allow and encourage you to grapple with this history of government policies contributing to inequality."
-
-**2.Normalized Difference Vegetation Index (NDVI)** (raster data)
-NDVI is used as proxy measure of vegetation health, cover and phenology (life cycle stage) over large areas. It is calculated using multiple bands from satellite images.
-
-#Calculate NDVI values for each city for different seasons to compare values for summer versus winter/spring
-
-# Exercise 1
-**Create a map which shows current (2019) mean NDVI across city redlining from the 1950s.**
+##Examining NDVI Values for San Jose
 
 ```{r}
 box2<- st_bbox(sf3)
