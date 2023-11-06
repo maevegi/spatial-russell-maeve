@@ -28,18 +28,9 @@ We are utilizing spatial data from the following source:  https://dsl.richmond.e
 
 **1.Mapping Inequality:** 
 
+We are using the function "tmap_mode" to generate interactive maps of the data
 ```{r}
-oakland_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CAOakland1937.zip"
-
-oakland_url <- paste0("/vsizip/vsicurl/", oakland_zip)
-
-oak <- read_sf(oakland_url)
-oak
-```
-
-
-```{r}
-tmap_mode("view") #hashtag when knitting
+#tmap_mode("view") #hashtag when knitting
 ```
 
 ```{r}
