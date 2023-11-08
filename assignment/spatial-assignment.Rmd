@@ -127,6 +127,7 @@ sf_ndvi
 ```
 ##Examining NDVI Values for San Jose
 
+We want to compare the NDVI values in San Francisco with other cities within the Bay Area. Our city of choice is San Jose. First we need to define a new bounding box with the same time span for San Jose. 
 ```{r}
 box2<- st_bbox(sf3)
 start_date <- "2022-06-01"
@@ -141,6 +142,7 @@ items <-
 
 ```
 
+Again, we are repeating the same processes with the new bounding box for San Jose. 
 ```{r}
 cube2 <- cube_view(srs = "EPSG:4326",  
                   extent = list(t0 = start_date, t1 = "2022-08-31",
@@ -153,6 +155,7 @@ S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 cube2
 ```
 
+We are making a raster cube and applying the calculations for NDVI.
 ```{r}
 sf3_ndvi <- 
   raster_cube(col, cube2, mask = S2.mask) |>
@@ -162,6 +165,7 @@ sf3_ndvi <-
 sf3_ndvi
 ```
 
+To map the data, we want to examine the average of all of the pixels within each HOLC grade district.
 ```{r}
 sf3_avg_ndvi<-sf3_ndvi|>
   extract_geom(sf3, FUN=mean)
@@ -169,35 +173,27 @@ sf3_avg_ndvi|>as_tibble()
 sf3_new<- sf3|> rowid_to_column("FID")
 sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
 sf3_polygons
-
-#why are NDVI values so small? 
-#fix reproducibility issues 
 ```
 
+Now we are combining the NDVI polygons with the HOLC grade polygons and mapping them. 
 ```{r}
 tmap_mode("plot")
 sanjose_NDVI<-tm_basemap()+
 tm_shape(sf3_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
   tm_shape(sf3_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
 
-sanjose_NDVI[holc_id=NA]<-NA
 sanjose_NDVI
 ```
 
+Finally we are summarizing the mean NDVI values for each HOLC grade assignment. 
 ```{r}
 sf3_polygons|>as_tibble()|>
  group_by(holc_grade)|>
  summarise(mean_NDVI=mean(NDVI))
 ```
 
-# Exercise 2
-**Plot the average NDVI values in different neighborhoods as well as the distribution of pixel values across cities and neighborhoods. Show how the trends differ between cities.**
+Overall, San Jose has higher mean NDVI values for all HOLC grades. For both cities, the highest NDVI values are for HOLC grade A and decreases accordingly from B to D. This supports the theory that Schell described whereby historical redlining conducted during the 1930s continues to have an ecological impact on cities in the present. 
 
-```{r}
+The maps we generated showcased the real life consequences of human policies on an ecological scale. Systemic racism created unequal distributions of biomass and greenness in cities. This has multiple implications for biodiversity and response to climate change. Neighborhoods with greater NDVI typically are able to support greater biodiversity as they provide habitat and food sources for more species. More trees and canopy cover also shade neighborhoods and provide aesthetic value. In neighborhoods with lower historical HOLC grades, lower biodiversity values not only mean less aesthetic value, but have greater consequences for human health. Areas with less shade are subject to the urban heat island effect, where radiation is absorbed and re-readiated by concrete and asphalt cover in urban areas. As global temperatures increase, cities will be subject to hotter temperatures, amplified by a lack of tree cover. 
 
-```
-
-
-# Exercise 3: 
-**Explain why considering systematic inequity and racism is important in the context of global change and developing solutions to the biodiversity crisis.**
-
+In the field of global change ecology, the importance of studying urban ecology is becoming increasingly recognized as a relevant field as human expansion continues. Therefore it is important for those studying this field to be aware of the history and policy decisions that continue to affect urban areas and the impact it has on ecology. There is an increasing acknowledgement of the relationship between human developed areas and nature, and that they are not completely isolated from one another. Moving forward these studies can help unify both groups and add insight into how future management decisions. 
