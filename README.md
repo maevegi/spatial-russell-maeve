@@ -6,27 +6,21 @@
 - Maeve Gilbert, maevegi
 - Russell Huang, Huangary1126
 
-This repository is a template for your team's repository.
 
 ## assignment
+For this assignment, we examined the consequences of historical redlining on NDVI values in the present. We used spatial data (polygons and rasters) to map redlining districts, or areas given grades based on "mortage risk" which were informed by racist policy decisions. We then took NDVI data of the chosen cities and mapped it onto the distribution of HOLC grade districts, and examined if tehre was any correlation between the two values. This work was based on a paper done by Christopher Schell that examined redlining and NDVI across multiple cities in the US (https://science.sciencemag.org/content/early/2020/08/12/science.aay4497). 
 
-All work for this assignment should be in the `assignment` directory.  You will work in the `.Rmd` notebook, and commit your rendered output files (`.md` and associated files) in the `assignment` directory as well.
+The Rmd file can be found in the assignments folder. The .md file can be found in the docs folder. 
 
-## Special files
-
-All team repositories will also include most of the special files found here:
 
 ### Common files
 
-- `README.md` this file, a general overview of the repository in markdown format.  
-- `.gitignore` Optional file, ignore common file types we don't want to accidentally commit to GitHub. Most projects should use this. 
-- `<REPO-NAME>.Rproj` Optional, an R-Project file created by RStudio for it's own configuration.  Some people prefer to `.gitignore` this file.
+- `README.md` This file contains a description of the project and where to find the relevant files.   
+
+### Other Files
+- renv file installed the renv package. This was later deactivated because it caused problems with loading packages. 
 
 
-### Infrastructure for Testing
-
-- `DESCRIPTION` a metadata file for the repository, based on the R package standard. It's main purpose here is as a place to list any additional R packages/libraries needed for any of the .Rmd files to run.
-- `.github/workflows/main.yml` defines the Continuous Integration testing script for running the .Rmd files to confirm reproducibility.
 
 
 
