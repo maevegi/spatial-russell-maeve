@@ -170,8 +170,7 @@ sf3_new<- sf3|> rowid_to_column("FID")
 sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
 sf3_polygons
 
-#why are NDVI values so small? 
-#fix reproducibility issues 
+
 ```
 
 ```{r}
@@ -190,12 +189,6 @@ sf3_polygons|>as_tibble()|>
  summarise(mean_NDVI=mean(NDVI))
 ```
 
-# Exercise 2
-**Plot the average NDVI values in different neighborhoods as well as the distribution of pixel values across cities and neighborhoods. Show how the trends differ between cities.**
-
-```{r}
-
-```
 
 
 # Exercise 3: 
