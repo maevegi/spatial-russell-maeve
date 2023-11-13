@@ -6,6 +6,8 @@ output:
     df_print: paged
   github_document:
     df_print: tibble
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
