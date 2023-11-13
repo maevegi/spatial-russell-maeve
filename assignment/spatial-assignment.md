@@ -1,3 +1,5 @@
+### The ecological and evolutionary consequences of systemic racism
+
 # Introduction to the Data Set
 
 In August 2020, [Christopher
@@ -33,8 +35,10 @@ Difference Vegetation Index) tracks historical redlining. ![Fig.
 We are utilizing spatial data from the following source:
 <https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro>
 
-**1.Mapping Inequality:** We first need to read in the shape files for
-the cities we are going to examine.
+**1.Mapping Inequality:**
+
+We first need to read in the shape files for the cities we are going to
+examine.
 
     san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
     san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
@@ -43,50 +47,6 @@ the cities we are going to examine.
     san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
     sf <- read_sf(san_franurl)
     sf3<- read_sf(san_joseurl)
-
-    sf
-
-    ## Simple feature collection with 97 features and 3 fields
-    ## Geometry type: MULTIPOLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -122.5101 ymin: 37.70801 xmax: -122.3627 ymax: 37.80668
-    ## Geodetic CRS:  WGS 84
-    ## # A tibble: 97 × 4
-    ##    name  holc_id holc_grade                                             geometry
-    ##    <chr> <chr>   <chr>                                        <MULTIPOLYGON [°]>
-    ##  1 <NA>  A1      A          (((-122.4755 37.78687, -122.4755 37.78625, -122.476…
-    ##  2 <NA>  A10     A          (((-122.4609 37.73566, -122.461 37.73572, -122.4613…
-    ##  3 <NA>  A11     A          (((-122.4562 37.74046, -122.4566 37.74032, -122.456…
-    ##  4 <NA>  A12     A          (((-122.4715 37.73326, -122.4665 37.73307, -122.465…
-    ##  5 <NA>  A13     A          (((-122.461 37.73572, -122.4609 37.73566, -122.4605…
-    ##  6 <NA>  A2      A          (((-122.4593 37.78795, -122.4598 37.78788, -122.459…
-    ##  7 <NA>  A3      A          (((-122.4472 37.78954, -122.4485 37.78935, -122.454…
-    ##  8 <NA>  A4      A          (((-122.446 37.80388, -122.4458 37.80235, -122.4456…
-    ##  9 <NA>  A5      A          (((-122.4463 37.79187, -122.447 37.7966, -122.4463 …
-    ## 10 <NA>  A6      A          (((-122.4731 37.7346, -122.4724 37.73464, -122.4723…
-    ## # ℹ 87 more rows
-
-    sf3
-
-    ## Simple feature collection with 37 features and 3 fields
-    ## Geometry type: MULTIPOLYGON
-    ## Dimension:     XY
-    ## Bounding box:  xmin: -121.9566 ymin: 37.28921 xmax: -121.8532 ymax: 37.3674
-    ## Geodetic CRS:  WGS 84
-    ## # A tibble: 37 × 4
-    ##    name  holc_id holc_grade                                             geometry
-    ##    <chr> <chr>   <chr>                                        <MULTIPOLYGON [°]>
-    ##  1 <NA>  A1      A          (((-121.9205 37.33682, -121.9241 37.33399, -121.920…
-    ##  2 <NA>  A2      A          (((-121.8674 37.33292, -121.8703 37.33155, -121.872…
-    ##  3 <NA>  B1      B          (((-121.9518 37.3473, -121.9493 37.34813, -121.949 …
-    ##  4 <NA>  B2      B          (((-121.936 37.34388, -121.9347 37.34296, -121.9347…
-    ##  5 <NA>  B3      B          (((-121.9271 37.32693, -121.932 37.32683, -121.9321…
-    ##  6 <NA>  B4      B          (((-121.8963 37.34395, -121.8988 37.34311, -121.901…
-    ##  7 <NA>  B5      B          (((-121.8679 37.3286, -121.8695 37.32788, -121.8729…
-    ##  8 <NA>  B6      B          (((-121.9015 37.31701, -121.8978 37.31691, -121.898…
-    ##  9 <NA>  B7      B          (((-121.8992 37.30631, -121.9013 37.30525, -121.899…
-    ## 10 <NA>  C1      C          (((-121.9438 37.35085, -121.9497 37.34872, -121.949…
-    ## # ℹ 27 more rows
 
 Here we want to view the shapefiles for the two cities we are examining,
 San Francisco (sf) and San Jose (sf3).
@@ -163,16 +123,16 @@ pixels within each HOLC grade district.
     ## # A tibble: 97 × 3
     ##      FID time        NDVI
     ##    <int> <chr>      <dbl>
-    ##  1     1 2022-06-01 0.314
+    ##  1     1 2022-06-01 0.315
     ##  2     2 2022-06-01 0.407
-    ##  3     3 2022-06-01 0.384
+    ##  3     3 2022-06-01 0.387
     ##  4     4 2022-06-01 0.246
     ##  5     5 2022-06-01 0.303
-    ##  6     6 2022-06-01 0.390
-    ##  7     7 2022-06-01 0.305
+    ##  6     6 2022-06-01 0.394
+    ##  7     7 2022-06-01 0.304
     ##  8     8 2022-06-01 0.238
-    ##  9     9 2022-06-01 0.309
-    ## 10    10 2022-06-01 0.268
+    ##  9     9 2022-06-01 0.310
+    ## 10    10 2022-06-01 0.269
     ## # ℹ 87 more rows
 
     sf_new<- sf|> rowid_to_column("FID")
@@ -204,10 +164,10 @@ NDVI values for each HOLC grade.
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
     ##   <chr>          <dbl>
-    ## 1 A              0.315
+    ## 1 A              0.316
     ## 2 B              0.209
-    ## 3 C              0.191
-    ## 4 D              0.190
+    ## 3 C              0.192
+    ## 4 D              0.192
 
 Based on the average values by HOLC grade district, it seems that the
 grade A polygons have the highest average NDVI value, followed by grade
@@ -269,16 +229,16 @@ within each HOLC grade district.
     ## # A tibble: 37 × 3
     ##      FID time        NDVI
     ##    <int> <chr>      <dbl>
-    ##  1     1 2022-06-01 0.368
-    ##  2     2 2022-06-01 0.468
-    ##  3     3 2022-06-01 0.287
+    ##  1     1 2022-06-01 0.367
+    ##  2     2 2022-06-01 0.466
+    ##  3     3 2022-06-01 0.286
     ##  4     4 2022-06-01 0.342
-    ##  5     5 2022-06-01 0.358
-    ##  6     6 2022-06-01 0.344
-    ##  7     7 2022-06-01 0.418
-    ##  8     8 2022-06-01 0.358
-    ##  9     9 2022-06-01 0.396
-    ## 10    10 2022-06-01 0.286
+    ##  5     5 2022-06-01 0.359
+    ##  6     6 2022-06-01 0.347
+    ##  7     7 2022-06-01 0.419
+    ##  8     8 2022-06-01 0.360
+    ##  9     9 2022-06-01 0.397
+    ## 10    10 2022-06-01 0.287
     ## # ℹ 27 more rows
 
     sf3_new<- sf3|> rowid_to_column("FID")
@@ -313,9 +273,9 @@ assignment.
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
     ##   <chr>          <dbl>
-    ## 1 A              0.418
-    ## 2 B              0.358
-    ## 3 C              0.293
+    ## 1 A              0.417
+    ## 2 B              0.359
+    ## 3 C              0.294
     ## 4 D              0.233
 
 Overall, San Jose has higher mean NDVI values for all HOLC grades. For

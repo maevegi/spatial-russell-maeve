@@ -25,7 +25,10 @@ library(tmap)
 gdalcubes::gdalcubes_options(parallel = TRUE)
 ```
 
+### The ecological and evolutionary consequences of systemic racism
+
 # Introduction to the Data Set
+
 In August 2020, [Christopher Schell](http://directory.tacoma.uw.edu/employee/cjschell) and collegues published a review in *Science* on ['The ecological and evolutionary consequences of systemic racism in urban environments'](https://science.sciencemag.org/content/early/2020/08/12/science.aay4497) (DOI: 10.1126/science.aay4497), showing how systematic racism and classism  has significant impacts on ecological and evolutionary processes within urban environments. Here we explore a subset of the data used to support these findings in this review and the broader literature.
 
 In order to examine the continuing effects of redlining, we are using the normalized difference vegetation index (NDVI) for San Francisco and comparing it to a map of loan grade districts, also known as a redlining. We are also going to compare the redlining and NDVI maps of San Francisco and San Jose. The loan grade areas were based on a scale from A to D based on "mortgage security risk" assigned by the Home Owners' Loan Corporation (HOLC). Zones with a grade of A were considered the least risky, while D was considered the lowest grade for high risk neighborhoods. In these low-grade districts it was much harder to get loans to purchase houses. The justification for the risk assessment was often if not always deeply motivated by racist policy which made it difficult for people of color to secure a loan to buy a house. Redlining not only has an economic impact even today, but also impacts other aspects of the urban areas, including the distribution of vegetation.  
@@ -36,6 +39,7 @@ In order to examine the continuing effects of redlining, we are using the normal
 We are utilizing spatial data from the following source:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
 
 **1.Mapping Inequality:** 
+
 We first need to read in the shape files for the cities we are going to examine. 
 ```{r}
 
@@ -47,8 +51,8 @@ san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
 sf <- read_sf(san_franurl)
 sf3<- read_sf(san_joseurl)
 
-sf
-sf3
+
+
 ```
 Here we want to view the shapefiles for the two cities we are examining, San Francisco (sf) and San Jose (sf3). 
 ```{r}
