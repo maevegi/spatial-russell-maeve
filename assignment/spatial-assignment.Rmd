@@ -1,11 +1,11 @@
 ---
 title: "The ecological and evolutionary consequences of systemic racism"
-author: "Maeve Gilbert and Russell Huang"
+authors: "Maeve Gilbert and Russell Huang"
 output: 
-  md_document:
-  github_document:
   html_document:
     df_print: paged
+  github_document:
+  md_document:
 ---
 
 ```{r setup, include=FALSE}
@@ -24,8 +24,6 @@ library(stars)
 library(tmap)
 gdalcubes::gdalcubes_options(parallel = TRUE)
 ```
-
-### The ecological and evolutionary consequences of systemic racism
 
 # Introduction to the Data Set
 
@@ -56,7 +54,7 @@ sf3<- read_sf(san_joseurl)
 ```
 Here we want to view the shapefiles for the two cities we are examining, San Francisco (sf) and San Jose (sf3). 
 ```{r}
-#tmap_mode("view") #hashtag this later when knitting 
+tmap_mode("view") #hashtag this later when knitting 
 tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
@@ -112,7 +110,7 @@ ndvi_polygons<- left_join(sf_new, avg_ndvi)
 ```
 Once we have the average values by each district, we want to plot these NDVI values onto the polygons of the HOLC districts. The darker green polygons have higher NDVI values, while the lighter green indicates lower NDVI values. The letters A-D indicate the HOLC grade.
 ```{r}
-#tmap_mode("plot")
+tmap_mode("plot")
 tm_basemap()+
 tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
   tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
