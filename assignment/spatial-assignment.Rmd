@@ -26,9 +26,9 @@ gdalcubes::gdalcubes_options(parallel = TRUE)
 # Introduction to the Data Set
 In August 2020, [Christopher Schell](http://directory.tacoma.uw.edu/employee/cjschell) and collegues published a review in *Science* on ['The ecological and evolutionary consequences of systemic racism in urban environments'](https://science.sciencemag.org/content/early/2020/08/12/science.aay4497) (DOI: 10.1126/science.aay4497), showing how systematic racism and classism  has significant impacts on ecological and evolutionary processes within urban environments. Here we explore a subset of the data used to support these findings in this review and the broader literature.
 
-In order to examine the continuing effects of redlining, we are examining the normalized difference vegetation index (NDVI) for San Francisco and compare it to the map of different loan grade district. We are also going to compare the redlining and NDVI maps of San Francisco and San Jose. These are areas assigned on a scale from A to D based on "mortgage security"by the Home Owners' Loan Corporation (HOLC). Zones with a grade of A were considered the least risky, while D was considered the lowest grade for high risk neighborhoods. In these low-grade districts it was much harder to get loans to purchase houses. These grades were usually assigned not on an economical standard, but on a racially motivated basis. 
+In order to examine the continuing effects of redlining, we are using the normalized difference vegetation index (NDVI) for San Francisco and comparing it to a map of loan grade districts, also known as a redlining. We are also going to compare the redlining and NDVI maps of San Francisco and San Jose. The loan grade areas were based on a scale from A to D based on "mortgage security risk" assigned by the Home Owners' Loan Corporation (HOLC). Zones with a grade of A were considered the least risky, while D was considered the lowest grade for high risk neighborhoods. In these low-grade districts it was much harder to get loans to purchase houses. The justification for the risk assessment was often if not always deeply motivated by racist policy which made it difficult for people of color to secure a loan to buy a house. Redlining not only has an economic impact even today, but also impacts other aspects of the urban areas, including the distribution of vegetation.  
 
-**Figure 2** Professor Schell's paper shows how NDVI (Normalized Difference Vegetation Index) tracks historical redlining.
+**Figure 1** Professor Schell's paper shows how NDVI (Normalized Difference Vegetation Index) tracks historical redlining.
 ![Fig. 1.](figures/fig2.png)
 
 We are utilizing spatial data from the following source:  https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro
@@ -55,7 +55,7 @@ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
 
-Next, we needed to specify the coordinates for the perimeter of the city, beginning with San Francisco. Once we have this shape defined, we can extract the necessary NDVI data collected from the Sentinel 2 satellite. 
+Next, we needed to specify the coordinates for the perimeter of the city, beginning with San Francisco. We also need to specify the date range for which we want the data. Once we have the shape and time span defined, we can extract the necessary NDVI data collected from the Sentinel 2 satellite. 
 ```{r}
 box<- st_bbox(sf)
 start_date <- "2022-06-01"
@@ -95,7 +95,7 @@ ndvi <-
   aggregate_time("P3M") 
 
 ```
-To map the data, we want to examine the average of all of the pixels within each HOLC grade district. 
+To map the data, we want to examine the average NDVI value of all of the pixels within each HOLC grade district. 
 ```{r}
 avg_ndvi<-ndvi|>
 extract_geom(sf, FUN=mean)
@@ -104,7 +104,7 @@ sf_new<- sf|> rowid_to_column("FID")
 ndvi_polygons<- left_join(sf_new, avg_ndvi)
 ndvi_polygons
 ```
-Once we have the average values by each district, we want to plot these NDVI values onto the polygons of the HOLC districts. The darker green polygons have higher NDVI values, while the lighter green indicates lower NDVI values.
+Once we have the average values by each district, we want to plot these NDVI values onto the polygons of the HOLC districts. The darker green polygons have higher NDVI values, while the lighter green indicates lower NDVI values. The letters A-D indicate the HOLC grade.
 ```{r}
 tmap_mode("plot")
 tm_basemap()+
@@ -118,6 +118,8 @@ ndvi_polygons|>as_tibble()|>
  summarise(mean_NDVI=mean(NDVI))
 
 ```
+Based on the average values by HOLC grade district, it seems that the grade A polygons have the highest average NDVI value, followed by grade B. Grades C and D are very similar, although grade C is slightly higher. 
+
 
 Finally, we want to examine the HOLC grade polygon map directly on top of the NDVI values as another visual representation of the correlation between the two values. 
 ```{r}
