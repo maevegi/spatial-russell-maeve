@@ -2,12 +2,12 @@
 title: "The ecological and evolutionary consequences of systemic racism"
 author: "Maeve Gilbert and Russell Huang"
 output: 
-  html_document:
-    df_print: paged
-  github_document:
-    df_print: tibble
   md_document:
     variant: markdown_github
+  github_document:
+    df_print: tibble
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -54,7 +54,7 @@ sf3
 ```
 Here we want to view the shapefiles for the two cities we are examining, San Francisco (sf) and San Jose (sf3). 
 ```{r}
-tmap_mode("view") #hashtag this later when knitting 
+#tmap_mode("view") #hashtag this later when knitting 
 tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 ```
@@ -106,11 +106,11 @@ extract_geom(sf, FUN=mean)
 avg_ndvi|>as_tibble()
 sf_new<- sf|> rowid_to_column("FID")
 ndvi_polygons<- left_join(sf_new, avg_ndvi)
-ndvi_polygons
+
 ```
 Once we have the average values by each district, we want to plot these NDVI values onto the polygons of the HOLC districts. The darker green polygons have higher NDVI values, while the lighter green indicates lower NDVI values. The letters A-D indicate the HOLC grade.
 ```{r}
-tmap_mode("plot")
+#tmap_mode("plot")
 tm_basemap()+
 tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
   tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
@@ -129,7 +129,7 @@ Finally, we want to examine the HOLC grade polygon map directly on top of the ND
 ```{r}
 ndvi2<- ndvi|> st_as_stars()
 sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
-sf_ndvi
+
 ```
 ##Examining NDVI Values for San Jose
 
@@ -158,7 +158,7 @@ cube2 <- cube_view(srs = "EPSG:4326",
                   aggregation = "median", resampling = "average")
 
 S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
-cube2
+
 ```
 
 Next, we need to make a new raster cube and apply the calculations for NDVI to the cube we created for San Jose. 
@@ -168,7 +168,7 @@ sf3_ndvi <-
   select_bands(c("B08", "B04")) |>
   apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
   aggregate_time("P3M") 
-sf3_ndvi
+
 ```
 
 To map the data, we want to examine the average of all of the pixels within each HOLC grade district.
@@ -178,7 +178,7 @@ sf3_avg_ndvi<-sf3_ndvi|>
 sf3_avg_ndvi|>as_tibble()
 sf3_new<- sf3|> rowid_to_column("FID")
 sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
-sf3_polygons
+
 ```
 
 Like we did for San Francisco, we need to combine the NDVI polygons with the HOLC grade polygons and map them together. As before, each polygon has a letter corresponding to the HOLC grade. The darker polygons have a higher NDVI value and therefore have more green vegetation. 

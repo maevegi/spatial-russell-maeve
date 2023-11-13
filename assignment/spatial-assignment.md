@@ -1,0 +1,392 @@
+# Introduction to the Data Set
+
+In August 2020, [Christopher
+Schell](http://directory.tacoma.uw.edu/employee/cjschell) and collegues
+published a review in *Science* on [‘The ecological and evolutionary
+consequences of systemic racism in urban
+environments’](https://science.sciencemag.org/content/early/2020/08/12/science.aay4497)
+(DOI: 10.1126/science.aay4497), showing how systematic racism and
+classism has significant impacts on ecological and evolutionary
+processes within urban environments. Here we explore a subset of the
+data used to support these findings in this review and the broader
+literature.
+
+In order to examine the continuing effects of redlining, we are using
+the normalized difference vegetation index (NDVI) for San Francisco and
+comparing it to a map of loan grade districts, also known as a
+redlining. We are also going to compare the redlining and NDVI maps of
+San Francisco and San Jose. The loan grade areas were based on a scale
+from A to D based on “mortgage security risk” assigned by the Home
+Owners’ Loan Corporation (HOLC). Zones with a grade of A were considered
+the least risky, while D was considered the lowest grade for high risk
+neighborhoods. In these low-grade districts it was much harder to get
+loans to purchase houses. The justification for the risk assessment was
+often if not always deeply motivated by racist policy which made it
+difficult for people of color to secure a loan to buy a house. Redlining
+not only has an economic impact even today, but also impacts other
+aspects of the urban areas, including the distribution of vegetation.
+
+**Figure 1** Professor Schell’s paper shows how NDVI (Normalized
+Difference Vegetation Index) tracks historical redlining. ![Fig.
+1.](figures/fig2.png)
+
+We are utilizing spatial data from the following source:
+<https://dsl.richmond.edu/panorama/redlining/#loc=3/41.245/-105.469&text=intro>
+
+**1.Mapping Inequality:** We first need to read in the shape files for
+the cities we are going to examine.
+
+``` r
+san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
+san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
+
+san_franurl <- paste0("/vsizip/vsicurl/", san_fran_zip)
+san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
+sf <- read_sf(san_franurl)
+sf3<- read_sf(san_joseurl)
+
+sf
+```
+
+    ## Simple feature collection with 97 features and 3 fields
+    ## Geometry type: MULTIPOLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -122.5101 ymin: 37.70801 xmax: -122.3627 ymax: 37.80668
+    ## Geodetic CRS:  WGS 84
+    ## # A tibble: 97 × 4
+    ##    name  holc_id holc_grade                                             geometry
+    ##    <chr> <chr>   <chr>                                        <MULTIPOLYGON [°]>
+    ##  1 <NA>  A1      A          (((-122.4755 37.78687, -122.4755 37.78625, -122.476…
+    ##  2 <NA>  A10     A          (((-122.4609 37.73566, -122.461 37.73572, -122.4613…
+    ##  3 <NA>  A11     A          (((-122.4562 37.74046, -122.4566 37.74032, -122.456…
+    ##  4 <NA>  A12     A          (((-122.4715 37.73326, -122.4665 37.73307, -122.465…
+    ##  5 <NA>  A13     A          (((-122.461 37.73572, -122.4609 37.73566, -122.4605…
+    ##  6 <NA>  A2      A          (((-122.4593 37.78795, -122.4598 37.78788, -122.459…
+    ##  7 <NA>  A3      A          (((-122.4472 37.78954, -122.4485 37.78935, -122.454…
+    ##  8 <NA>  A4      A          (((-122.446 37.80388, -122.4458 37.80235, -122.4456…
+    ##  9 <NA>  A5      A          (((-122.4463 37.79187, -122.447 37.7966, -122.4463 …
+    ## 10 <NA>  A6      A          (((-122.4731 37.7346, -122.4724 37.73464, -122.4723…
+    ## # ℹ 87 more rows
+
+``` r
+sf3
+```
+
+    ## Simple feature collection with 37 features and 3 fields
+    ## Geometry type: MULTIPOLYGON
+    ## Dimension:     XY
+    ## Bounding box:  xmin: -121.9566 ymin: 37.28921 xmax: -121.8532 ymax: 37.3674
+    ## Geodetic CRS:  WGS 84
+    ## # A tibble: 37 × 4
+    ##    name  holc_id holc_grade                                             geometry
+    ##    <chr> <chr>   <chr>                                        <MULTIPOLYGON [°]>
+    ##  1 <NA>  A1      A          (((-121.9205 37.33682, -121.9241 37.33399, -121.920…
+    ##  2 <NA>  A2      A          (((-121.8674 37.33292, -121.8703 37.33155, -121.872…
+    ##  3 <NA>  B1      B          (((-121.9518 37.3473, -121.9493 37.34813, -121.949 …
+    ##  4 <NA>  B2      B          (((-121.936 37.34388, -121.9347 37.34296, -121.9347…
+    ##  5 <NA>  B3      B          (((-121.9271 37.32693, -121.932 37.32683, -121.9321…
+    ##  6 <NA>  B4      B          (((-121.8963 37.34395, -121.8988 37.34311, -121.901…
+    ##  7 <NA>  B5      B          (((-121.8679 37.3286, -121.8695 37.32788, -121.8729…
+    ##  8 <NA>  B6      B          (((-121.9015 37.31701, -121.8978 37.31691, -121.898…
+    ##  9 <NA>  B7      B          (((-121.8992 37.30631, -121.9013 37.30525, -121.899…
+    ## 10 <NA>  C1      C          (((-121.9438 37.35085, -121.9497 37.34872, -121.949…
+    ## # ℹ 27 more rows
+
+Here we want to view the shapefiles for the two cities we are examining,
+San Francisco (sf) and San Jose (sf3).
+
+``` r
+#tmap_mode("view") #hashtag this later when knitting 
+tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
+```
+
+![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-2-1.png)
+
+``` r
+tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
+```
+
+![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+
+Next, we needed to specify the coordinates for the perimeter of the
+city, beginning with San Francisco. We also need to specify the date
+range for which we want the data. Once we have the shape and time span
+defined, we can extract the necessary NDVI data collected from the
+Sentinel 2 satellite.
+
+``` r
+box<- st_bbox(sf)
+start_date <- "2022-06-01"
+end_date <- "2022-08-31"
+items <- 
+  stac("https://earth-search.aws.element84.com/v0/") |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox =c(box),
+              datetime = paste(start_date, end_date, sep="/"),
+              limit = 100) |>
+  post_request() 
+```
+
+Because NDVI is collected from satellite data, we specify which bands of
+light we are going to examine, in this case green, and exclude any
+values with more than 20% cloud cover.
+
+``` r
+col <-
+  stac_image_collection(items$features,
+                        asset_names = c("B02", "B03", "B04","B08", "SCL"),
+                        property_filter = \(x) {x[["eo:cloud_cover"]] < 20})
+```
+
+    ## Warning in stac_image_collection(items$features, asset_names = c("B02", : STAC
+    ## asset with name 'SCL' does not include eo:bands metadata and will be considered
+    ## as a single band source
+
+Using the data we extracted and the time span and dimensions of our area
+of study, we can create a spatiotemporal data cube with all of this
+information.
+
+``` r
+cube <- cube_view(srs = "EPSG:4326",  
+                  extent = list(t0 = start_date, t1 = "2022-08-31",
+                                left = box[1], right = box[3],
+                                top = box[4], bottom = box[2]),
+                  nx = 1000, ny = 1000, dt = "P1M",
+                  aggregation = "median", resampling = "average")
+
+S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
+```
+
+Once we have defined the data cube, we need to apply the calculation for
+NDVI using the specified data bands for infrared and near-infrared
+light.
+
+``` r
+ndvi <- 
+  raster_cube(col, cube, mask = S2.mask) |>
+  select_bands(c("B08", "B04")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+  aggregate_time("P3M") 
+```
+
+To map the data, we want to examine the average NDVI value of all of the
+pixels within each HOLC grade district.
+
+``` r
+avg_ndvi<-ndvi|>
+extract_geom(sf, FUN=mean)
+avg_ndvi|>as_tibble()
+```
+
+    ## # A tibble: 97 × 3
+    ##      FID time        NDVI
+    ##    <int> <chr>      <dbl>
+    ##  1     1 2022-06-01 0.315
+    ##  2     2 2022-06-01 0.407
+    ##  3     3 2022-06-01 0.387
+    ##  4     4 2022-06-01 0.246
+    ##  5     5 2022-06-01 0.303
+    ##  6     6 2022-06-01 0.394
+    ##  7     7 2022-06-01 0.304
+    ##  8     8 2022-06-01 0.238
+    ##  9     9 2022-06-01 0.310
+    ## 10    10 2022-06-01 0.269
+    ## # ℹ 87 more rows
+
+``` r
+sf_new<- sf|> rowid_to_column("FID")
+ndvi_polygons<- left_join(sf_new, avg_ndvi)
+```
+
+    ## Joining with `by = join_by(FID)`
+
+Once we have the average values by each district, we want to plot these
+NDVI values onto the polygons of the HOLC districts. The darker green
+polygons have higher NDVI values, while the lighter green indicates
+lower NDVI values. The letters A-D indicate the HOLC grade.
+
+``` r
+#tmap_mode("plot")
+tm_basemap()+
+tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+  tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
+```
+
+![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-8-1.png)
+While the map gives us a visual representation of the data, it is
+difficult to determine with certainty whether areas with higher grades
+of A or B have higher NDVI values. In order to determine whether there
+is a correlation between the two values, we need to look at the average
+NDVI values for each HOLC grade.
+
+``` r
+ndvi_polygons|>as_tibble()|>
+ group_by(holc_grade)|>
+ summarise(mean_NDVI=mean(NDVI))
+```
+
+    ## # A tibble: 4 × 2
+    ##   holc_grade mean_NDVI
+    ##   <chr>          <dbl>
+    ## 1 A              0.316
+    ## 2 B              0.209
+    ## 3 C              0.192
+    ## 4 D              0.192
+
+Based on the average values by HOLC grade district, it seems that the
+grade A polygons have the highest average NDVI value, followed by grade
+B. Grades C and D are very similar, although grade C is slightly higher.
+
+Finally, we want to examine the HOLC grade polygon map directly on top
+of the NDVI values as another visual representation of the correlation
+between the two values.
+
+``` r
+ndvi2<- ndvi|> st_as_stars()
+sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
+```
+
+##Examining NDVI Values for San Jose
+
+We want to compare the NDVI values of San Francisco with another city
+within the Bay Area. Our city of choice is San Jose. First we need to
+define a new bounding box with the same time span but with the
+boundaries of the San Jose shapefile (sf3).
+
+``` r
+box2<- st_bbox(sf3)
+start_date <- "2022-06-01"
+end_date <- "2022-08-31"
+items <- 
+  stac("https://earth-search.aws.element84.com/v0/") |>
+  stac_search(collections = "sentinel-s2-l2a-cogs",
+              bbox =c(box2),
+              datetime = paste(start_date, end_date, sep="/"),
+              limit = 100) |>
+  post_request() 
+```
+
+Again, we are repeating the same processes with the new bounding box for
+San Jose.
+
+``` r
+cube2 <- cube_view(srs = "EPSG:4326",  
+                  extent = list(t0 = start_date, t1 = "2022-08-31",
+                                left = box2[1], right = box2[3],
+                                top = box2[4], bottom = box2[2]),
+                  nx = 1000, ny = 1000, dt = "P1M",
+                  aggregation = "median", resampling = "average")
+
+S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
+```
+
+Next, we need to make a new raster cube and apply the calculations for
+NDVI to the cube we created for San Jose.
+
+``` r
+sf3_ndvi <- 
+  raster_cube(col, cube2, mask = S2.mask) |>
+  select_bands(c("B08", "B04")) |>
+  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+  aggregate_time("P3M") 
+```
+
+To map the data, we want to examine the average of all of the pixels
+within each HOLC grade district.
+
+``` r
+sf3_avg_ndvi<-sf3_ndvi|>
+  extract_geom(sf3, FUN=mean)
+sf3_avg_ndvi|>as_tibble()
+```
+
+    ## # A tibble: 37 × 3
+    ##      FID time        NDVI
+    ##    <int> <chr>      <dbl>
+    ##  1     1 2022-06-01 0.367
+    ##  2     2 2022-06-01 0.466
+    ##  3     3 2022-06-01 0.286
+    ##  4     4 2022-06-01 0.342
+    ##  5     5 2022-06-01 0.359
+    ##  6     6 2022-06-01 0.347
+    ##  7     7 2022-06-01 0.419
+    ##  8     8 2022-06-01 0.360
+    ##  9     9 2022-06-01 0.397
+    ## 10    10 2022-06-01 0.287
+    ## # ℹ 27 more rows
+
+``` r
+sf3_new<- sf3|> rowid_to_column("FID")
+sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
+```
+
+    ## Joining with `by = join_by(FID)`
+
+Like we did for San Francisco, we need to combine the NDVI polygons with
+the HOLC grade polygons and map them together. As before, each polygon
+has a letter corresponding to the HOLC grade. The darker polygons have a
+higher NDVI value and therefore have more green vegetation.
+
+``` r
+tmap_mode("plot")
+```
+
+    ## tmap mode set to plotting
+
+``` r
+sanjose_NDVI<-tm_basemap()+
+tm_shape(sf3_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+  tm_shape(sf3_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
+
+sanjose_NDVI
+```
+
+![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-15-1.png)
+
+Finally, we summarize the mean NDVI values for each HOLC grade
+assignment.
+
+``` r
+sf3_polygons|>as_tibble()|>
+ group_by(holc_grade)|>
+ summarise(mean_NDVI=mean(NDVI))
+```
+
+    ## # A tibble: 4 × 2
+    ##   holc_grade mean_NDVI
+    ##   <chr>          <dbl>
+    ## 1 A              0.417
+    ## 2 B              0.359
+    ## 3 C              0.294
+    ## 4 D              0.233
+
+Overall, San Jose has higher mean NDVI values for all HOLC grades. For
+both cities, the highest NDVI values are for HOLC grade A. NDVI
+decreases through grades B to D. This supports the theory that
+Dr. Schell described whereby historical redlining conducted during the
+1930s continues to have an ecological impact on cities in the present.
+
+The maps we generated showcase the real-life consequences of human
+policies on an ecological scale. Systemic racism created unequal
+distributions of biomass and greenness in cities. This has multiple
+implications for biodiversity and response to climate change.
+Neighborhoods with greater NDVI typically should be able to support
+greater biodiversity as they provide habitat and food sources for more
+species. More trees and canopy cover also shade neighborhoods and
+provide aesthetic value. In neighborhoods with lower historical HOLC
+grades, lower biodiversity values not only mean less aesthetic value,
+but have greater consequences for human health. Areas with less shade
+are subject to the urban heat island effect, where radiation is absorbed
+and re-readiated by concrete and asphalt cover in urban areas. As global
+temperatures increase, cities will be subject to hotter temperatures,
+amplified by a lack of tree cover.
+
+In the field of global change ecology, the importance of studying urban
+ecology is becoming increasingly recognized as a relevant field as human
+expansion continues. Therefore it is important for those studying this
+field to be aware of the history and policy decisions that continue to
+affect urban areas and the impact it has on ecology. There is an
+increasing acknowledgement of the relationship between human developed
+areas and nature, and that they are not completely isolated from one
+another. Moving forward these studies can help unify both groups and add
+insight to future management decisions.
