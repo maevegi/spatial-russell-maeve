@@ -36,17 +36,15 @@ We are utilizing spatial data from the following source:
 **1.Mapping Inequality:** We first need to read in the shape files for
 the cities we are going to examine.
 
-``` r
-san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
-san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
+    san_fran_zip <- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanFrancisco1937.zip"
+    san_josezip<- "https://dsl.richmond.edu/panorama/redlining/static/downloads/shapefiles/CASanJose1937.zip"
 
-san_franurl <- paste0("/vsizip/vsicurl/", san_fran_zip)
-san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
-sf <- read_sf(san_franurl)
-sf3<- read_sf(san_joseurl)
+    san_franurl <- paste0("/vsizip/vsicurl/", san_fran_zip)
+    san_joseurl<-paste0("/vsizip/vsicurl/", san_josezip)
+    sf <- read_sf(san_franurl)
+    sf3<- read_sf(san_joseurl)
 
-sf
-```
+    sf
 
     ## Simple feature collection with 97 features and 3 fields
     ## Geometry type: MULTIPOLYGON
@@ -68,9 +66,7 @@ sf
     ## 10 <NA>  A6      A          (((-122.4731 37.7346, -122.4724 37.73464, -122.4723…
     ## # ℹ 87 more rows
 
-``` r
-sf3
-```
+    sf3
 
     ## Simple feature collection with 37 features and 3 fields
     ## Geometry type: MULTIPOLYGON
@@ -95,18 +91,14 @@ sf3
 Here we want to view the shapefiles for the two cities we are examining,
 San Francisco (sf) and San Jose (sf3).
 
-``` r
-#tmap_mode("view") #hashtag this later when knitting 
-tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
-```
+    #tmap_mode("view") #hashtag this later when knitting 
+    tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)
 
-![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-2-1.png)
+![](spatial-assignment_files/figure-markdown_strict/unnamed-chunk-2-1.png)
 
-``` r
-tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
-```
+    tm_shape(sf3)+ tm_polygons("holc_grade", alpha=0.5)
 
-![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-2-2.png)
+![](spatial-assignment_files/figure-markdown_strict/unnamed-chunk-2-2.png)
 
 Next, we needed to specify the coordinates for the perimeter of the
 city, beginning with San Francisco. We also need to specify the date
@@ -114,29 +106,25 @@ range for which we want the data. Once we have the shape and time span
 defined, we can extract the necessary NDVI data collected from the
 Sentinel 2 satellite.
 
-``` r
-box<- st_bbox(sf)
-start_date <- "2022-06-01"
-end_date <- "2022-08-31"
-items <- 
-  stac("https://earth-search.aws.element84.com/v0/") |>
-  stac_search(collections = "sentinel-s2-l2a-cogs",
-              bbox =c(box),
-              datetime = paste(start_date, end_date, sep="/"),
-              limit = 100) |>
-  post_request() 
-```
+    box<- st_bbox(sf)
+    start_date <- "2022-06-01"
+    end_date <- "2022-08-31"
+    items <- 
+      stac("https://earth-search.aws.element84.com/v0/") |>
+      stac_search(collections = "sentinel-s2-l2a-cogs",
+                  bbox =c(box),
+                  datetime = paste(start_date, end_date, sep="/"),
+                  limit = 100) |>
+      post_request() 
 
 Because NDVI is collected from satellite data, we specify which bands of
 light we are going to examine, in this case green, and exclude any
 values with more than 20% cloud cover.
 
-``` r
-col <-
-  stac_image_collection(items$features,
-                        asset_names = c("B02", "B03", "B04","B08", "SCL"),
-                        property_filter = \(x) {x[["eo:cloud_cover"]] < 20})
-```
+    col <-
+      stac_image_collection(items$features,
+                            asset_names = c("B02", "B03", "B04","B08", "SCL"),
+                            property_filter = \(x) {x[["eo:cloud_cover"]] < 20})
 
     ## Warning in stac_image_collection(items$features, asset_names = c("B02", : STAC
     ## asset with name 'SCL' does not include eo:bands metadata and will be considered
@@ -146,37 +134,31 @@ Using the data we extracted and the time span and dimensions of our area
 of study, we can create a spatiotemporal data cube with all of this
 information.
 
-``` r
-cube <- cube_view(srs = "EPSG:4326",  
-                  extent = list(t0 = start_date, t1 = "2022-08-31",
-                                left = box[1], right = box[3],
-                                top = box[4], bottom = box[2]),
-                  nx = 1000, ny = 1000, dt = "P1M",
-                  aggregation = "median", resampling = "average")
+    cube <- cube_view(srs = "EPSG:4326",  
+                      extent = list(t0 = start_date, t1 = "2022-08-31",
+                                    left = box[1], right = box[3],
+                                    top = box[4], bottom = box[2]),
+                      nx = 1000, ny = 1000, dt = "P1M",
+                      aggregation = "median", resampling = "average")
 
-S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
-```
+    S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 
 Once we have defined the data cube, we need to apply the calculation for
 NDVI using the specified data bands for infrared and near-infrared
 light.
 
-``` r
-ndvi <- 
-  raster_cube(col, cube, mask = S2.mask) |>
-  select_bands(c("B08", "B04")) |>
-  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
-  aggregate_time("P3M") 
-```
+    ndvi <- 
+      raster_cube(col, cube, mask = S2.mask) |>
+      select_bands(c("B08", "B04")) |>
+      apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+      aggregate_time("P3M") 
 
 To map the data, we want to examine the average NDVI value of all of the
 pixels within each HOLC grade district.
 
-``` r
-avg_ndvi<-ndvi|>
-extract_geom(sf, FUN=mean)
-avg_ndvi|>as_tibble()
-```
+    avg_ndvi<-ndvi|>
+    extract_geom(sf, FUN=mean)
+    avg_ndvi|>as_tibble()
 
     ## # A tibble: 97 × 3
     ##      FID time        NDVI
@@ -193,10 +175,8 @@ avg_ndvi|>as_tibble()
     ## 10    10 2022-06-01 0.269
     ## # ℹ 87 more rows
 
-``` r
-sf_new<- sf|> rowid_to_column("FID")
-ndvi_polygons<- left_join(sf_new, avg_ndvi)
-```
+    sf_new<- sf|> rowid_to_column("FID")
+    ndvi_polygons<- left_join(sf_new, avg_ndvi)
 
     ## Joining with `by = join_by(FID)`
 
@@ -205,25 +185,21 @@ NDVI values onto the polygons of the HOLC districts. The darker green
 polygons have higher NDVI values, while the lighter green indicates
 lower NDVI values. The letters A-D indicate the HOLC grade.
 
-``` r
-#tmap_mode("plot")
-tm_basemap()+
-tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
-  tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
-```
+    #tmap_mode("plot")
+    tm_basemap()+
+    tm_shape(ndvi_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+      tm_shape(ndvi_polygons)+ tm_text("holc_grade", size=0.5)
 
-![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-8-1.png)
+![](spatial-assignment_files/figure-markdown_strict/unnamed-chunk-8-1.png)
 While the map gives us a visual representation of the data, it is
 difficult to determine with certainty whether areas with higher grades
 of A or B have higher NDVI values. In order to determine whether there
 is a correlation between the two values, we need to look at the average
 NDVI values for each HOLC grade.
 
-``` r
-ndvi_polygons|>as_tibble()|>
- group_by(holc_grade)|>
- summarise(mean_NDVI=mean(NDVI))
-```
+    ndvi_polygons|>as_tibble()|>
+     group_by(holc_grade)|>
+     summarise(mean_NDVI=mean(NDVI))
 
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
@@ -241,64 +217,54 @@ Finally, we want to examine the HOLC grade polygon map directly on top
 of the NDVI values as another visual representation of the correlation
 between the two values.
 
-``` r
-ndvi2<- ndvi|> st_as_stars()
-sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
-```
+    ndvi2<- ndvi|> st_as_stars()
+    sf_ndvi<-tm_shape(ndvi2)+ tm_raster()+ tm_shape(sf) + tm_polygons("holc_grade", alpha=0.5)+ tm_layout(legend.position=c("right", "bottom"))
 
-##Examining NDVI Values for San Jose
+\##Examining NDVI Values for San Jose
 
 We want to compare the NDVI values of San Francisco with another city
 within the Bay Area. Our city of choice is San Jose. First we need to
 define a new bounding box with the same time span but with the
 boundaries of the San Jose shapefile (sf3).
 
-``` r
-box2<- st_bbox(sf3)
-start_date <- "2022-06-01"
-end_date <- "2022-08-31"
-items <- 
-  stac("https://earth-search.aws.element84.com/v0/") |>
-  stac_search(collections = "sentinel-s2-l2a-cogs",
-              bbox =c(box2),
-              datetime = paste(start_date, end_date, sep="/"),
-              limit = 100) |>
-  post_request() 
-```
+    box2<- st_bbox(sf3)
+    start_date <- "2022-06-01"
+    end_date <- "2022-08-31"
+    items <- 
+      stac("https://earth-search.aws.element84.com/v0/") |>
+      stac_search(collections = "sentinel-s2-l2a-cogs",
+                  bbox =c(box2),
+                  datetime = paste(start_date, end_date, sep="/"),
+                  limit = 100) |>
+      post_request() 
 
 Again, we are repeating the same processes with the new bounding box for
 San Jose.
 
-``` r
-cube2 <- cube_view(srs = "EPSG:4326",  
-                  extent = list(t0 = start_date, t1 = "2022-08-31",
-                                left = box2[1], right = box2[3],
-                                top = box2[4], bottom = box2[2]),
-                  nx = 1000, ny = 1000, dt = "P1M",
-                  aggregation = "median", resampling = "average")
+    cube2 <- cube_view(srs = "EPSG:4326",  
+                      extent = list(t0 = start_date, t1 = "2022-08-31",
+                                    left = box2[1], right = box2[3],
+                                    top = box2[4], bottom = box2[2]),
+                      nx = 1000, ny = 1000, dt = "P1M",
+                      aggregation = "median", resampling = "average")
 
-S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
-```
+    S2.mask <- image_mask("SCL", values=c(3,8,9)) # mask clouds and cloud shadows
 
 Next, we need to make a new raster cube and apply the calculations for
 NDVI to the cube we created for San Jose.
 
-``` r
-sf3_ndvi <- 
-  raster_cube(col, cube2, mask = S2.mask) |>
-  select_bands(c("B08", "B04")) |>
-  apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
-  aggregate_time("P3M") 
-```
+    sf3_ndvi <- 
+      raster_cube(col, cube2, mask = S2.mask) |>
+      select_bands(c("B08", "B04")) |>
+      apply_pixel("(B08-B04)/(B08+B04)", "NDVI") |>
+      aggregate_time("P3M") 
 
 To map the data, we want to examine the average of all of the pixels
 within each HOLC grade district.
 
-``` r
-sf3_avg_ndvi<-sf3_ndvi|>
-  extract_geom(sf3, FUN=mean)
-sf3_avg_ndvi|>as_tibble()
-```
+    sf3_avg_ndvi<-sf3_ndvi|>
+      extract_geom(sf3, FUN=mean)
+    sf3_avg_ndvi|>as_tibble()
 
     ## # A tibble: 37 × 3
     ##      FID time        NDVI
@@ -315,10 +281,8 @@ sf3_avg_ndvi|>as_tibble()
     ## 10    10 2022-06-01 0.287
     ## # ℹ 27 more rows
 
-``` r
-sf3_new<- sf3|> rowid_to_column("FID")
-sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
-```
+    sf3_new<- sf3|> rowid_to_column("FID")
+    sf3_polygons<- left_join(sf3_new, sf3_avg_ndvi)
 
     ## Joining with `by = join_by(FID)`
 
@@ -327,30 +291,24 @@ the HOLC grade polygons and map them together. As before, each polygon
 has a letter corresponding to the HOLC grade. The darker polygons have a
 higher NDVI value and therefore have more green vegetation.
 
-``` r
-tmap_mode("plot")
-```
+    tmap_mode("plot")
 
     ## tmap mode set to plotting
 
-``` r
-sanjose_NDVI<-tm_basemap()+
-tm_shape(sf3_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
-  tm_shape(sf3_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
+    sanjose_NDVI<-tm_basemap()+
+    tm_shape(sf3_polygons)+tm_polygons("NDVI", style="quantile", palette="Greens")+
+      tm_shape(sf3_polygons)+ tm_text("holc_grade", size=0.5)+tm_layout(legend.width=0.5)
 
-sanjose_NDVI
-```
+    sanjose_NDVI
 
-![](spatial-assignment_files/figure-markdown_github/unnamed-chunk-15-1.png)
+![](spatial-assignment_files/figure-markdown_strict/unnamed-chunk-15-1.png)
 
 Finally, we summarize the mean NDVI values for each HOLC grade
 assignment.
 
-``` r
-sf3_polygons|>as_tibble()|>
- group_by(holc_grade)|>
- summarise(mean_NDVI=mean(NDVI))
-```
+    sf3_polygons|>as_tibble()|>
+     group_by(holc_grade)|>
+     summarise(mean_NDVI=mean(NDVI))
 
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
