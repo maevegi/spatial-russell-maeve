@@ -3,9 +3,7 @@ title: "The ecological and evolutionary consequences of systemic racism"
 author: "Maeve Gilbert and Russell Huang"
 output: 
   md_document:
-    variant: markdown_github
   github_document:
-    df_print: tibble
   html_document:
     df_print: paged
 ---
