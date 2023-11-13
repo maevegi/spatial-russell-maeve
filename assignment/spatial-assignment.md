@@ -163,16 +163,16 @@ pixels within each HOLC grade district.
     ## # A tibble: 97 × 3
     ##      FID time        NDVI
     ##    <int> <chr>      <dbl>
-    ##  1     1 2022-06-01 0.315
+    ##  1     1 2022-06-01 0.314
     ##  2     2 2022-06-01 0.407
-    ##  3     3 2022-06-01 0.387
+    ##  3     3 2022-06-01 0.384
     ##  4     4 2022-06-01 0.246
     ##  5     5 2022-06-01 0.303
-    ##  6     6 2022-06-01 0.394
-    ##  7     7 2022-06-01 0.304
+    ##  6     6 2022-06-01 0.390
+    ##  7     7 2022-06-01 0.305
     ##  8     8 2022-06-01 0.238
-    ##  9     9 2022-06-01 0.310
-    ## 10    10 2022-06-01 0.269
+    ##  9     9 2022-06-01 0.309
+    ## 10    10 2022-06-01 0.268
     ## # ℹ 87 more rows
 
     sf_new<- sf|> rowid_to_column("FID")
@@ -204,10 +204,10 @@ NDVI values for each HOLC grade.
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
     ##   <chr>          <dbl>
-    ## 1 A              0.316
+    ## 1 A              0.315
     ## 2 B              0.209
-    ## 3 C              0.192
-    ## 4 D              0.192
+    ## 3 C              0.191
+    ## 4 D              0.190
 
 Based on the average values by HOLC grade district, it seems that the
 grade A polygons have the highest average NDVI value, followed by grade
@@ -269,16 +269,16 @@ within each HOLC grade district.
     ## # A tibble: 37 × 3
     ##      FID time        NDVI
     ##    <int> <chr>      <dbl>
-    ##  1     1 2022-06-01 0.367
-    ##  2     2 2022-06-01 0.466
-    ##  3     3 2022-06-01 0.286
+    ##  1     1 2022-06-01 0.368
+    ##  2     2 2022-06-01 0.468
+    ##  3     3 2022-06-01 0.287
     ##  4     4 2022-06-01 0.342
-    ##  5     5 2022-06-01 0.359
-    ##  6     6 2022-06-01 0.347
-    ##  7     7 2022-06-01 0.419
-    ##  8     8 2022-06-01 0.360
-    ##  9     9 2022-06-01 0.397
-    ## 10    10 2022-06-01 0.287
+    ##  5     5 2022-06-01 0.358
+    ##  6     6 2022-06-01 0.344
+    ##  7     7 2022-06-01 0.418
+    ##  8     8 2022-06-01 0.358
+    ##  9     9 2022-06-01 0.396
+    ## 10    10 2022-06-01 0.286
     ## # ℹ 27 more rows
 
     sf3_new<- sf3|> rowid_to_column("FID")
@@ -313,9 +313,9 @@ assignment.
     ## # A tibble: 4 × 2
     ##   holc_grade mean_NDVI
     ##   <chr>          <dbl>
-    ## 1 A              0.417
-    ## 2 B              0.359
-    ## 3 C              0.294
+    ## 1 A              0.418
+    ## 2 B              0.358
+    ## 3 C              0.293
     ## 4 D              0.233
 
 Overall, San Jose has higher mean NDVI values for all HOLC grades. For
