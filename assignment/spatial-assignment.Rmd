@@ -4,6 +4,8 @@ author: "Maeve Gilbert and Russell Huang"
 output: 
   html_document:
     df_print: paged
+  github_document:
+    df_print: tibble
 ---
 
 ```{r setup, include=FALSE}
